@@ -10,9 +10,7 @@ package frc.robot;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.ctre.phoenix.CANifier;
-import com.ctre.phoenix.CANifier.PWMChannel;
-import com.revrobotics.CANSparkMax.IdleMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -35,17 +33,17 @@ import frc.team88.swerve.util.constants.DoublePreferenceConstant;
 import frc.team88.swerve.util.constants.PIDPreferenceConstants;
 import frc.team88.swerve.wrappers.gyro.NavX;
 import frc.team88.swerve.swervemodule.motorsensor.MotorCombiner;
+import frc.team88.swerve.swervemodule.motorsensor.PIDFalcon;
 
 public class Robot extends TimedRobot {
 
-    private HashMap<String, PIDNeo> neos;
+    private HashMap<String, PIDFalcon> motors;
     private HashMap<String, PIDMotor> outputs;
     private HashMap<String, PositionVelocitySensor> azimuthEncoders;
     private HashMap<String, SwerveModule> modules;
     private NavX navx;
     private SwerveChassis chassis;
 
-    private CANifier canifier;
     private Joystick gamepad;
 
     private PIDPreferenceConstants motorSpeedPIDConstants;
@@ -71,34 +69,34 @@ public class Robot extends TimedRobot {
         azimuthPositionPIDConstants = new PIDPreferenceConstants("Azimuth Position", 8.5, 0, 0.15, 0, 0, 0, 0);
 
         // Create the base NEOs
-        neos = new HashMap<>();
-        neos.put("fl+", new PIDNeo(16, motorSpeedPIDConstants));
-        neos.put("fl-", new PIDNeo(1, motorSpeedPIDConstants));
-        neos.put("bl+", new PIDNeo(2, motorSpeedPIDConstants));
-        neos.put("bl-", new PIDNeo(3, motorSpeedPIDConstants));
-        neos.put("br+", new PIDNeo(12, motorSpeedPIDConstants));
-        neos.put("br-", new PIDNeo(13, motorSpeedPIDConstants));
-        neos.put("fr+", new PIDNeo(14, motorSpeedPIDConstants));
-        neos.put("fr-", new PIDNeo(15, motorSpeedPIDConstants));
+        motors = new HashMap<>();
+        motors.put("fl+", new PIDFalcon(16, motorSpeedPIDConstants));
+        motors.put("fl-", new PIDFalcon(1, motorSpeedPIDConstants));
+        motors.put("bl+", new PIDFalcon(2, motorSpeedPIDConstants));
+        motors.put("bl-", new PIDFalcon(3, motorSpeedPIDConstants));
+        motors.put("br+", new PIDFalcon(12, motorSpeedPIDConstants));
+        motors.put("br-", new PIDFalcon(13, motorSpeedPIDConstants));
+        motors.put("fr+", new PIDFalcon(14, motorSpeedPIDConstants));
+        motors.put("fr-", new PIDFalcon(15, motorSpeedPIDConstants));
 
         // Reversing all neos makes for counterclockise azimuth to be positve
-        for (Map.Entry<String, PIDNeo> entry : neos.entrySet()) {
+        for (Map.Entry<String, PIDFalcon> entry : motors.entrySet()) {
             entry.getValue().setInverted(true);
         }
 
         // Create the differential/planetary
         MotorCombiner flCombiner = new MotorCombiner.Builder(2)
-                .addInput(neos.get("fl+"), 0.0183431952662722, 0.0668091168091168)
-                .addInput(neos.get("fl-"), 0.0183431952662722, -0.0535612535612536).build();
+                .addInput(motors.get("fl+"), 0.0166667, 0.0888888889)
+                .addInput(motors.get("fl-"), 0.0166667, -0.7777777778).build();
         MotorCombiner blCombiner = new MotorCombiner.Builder(2)
-                .addInput(neos.get("bl+"), 0.0183431952662722, 0.0668091168091168)
-                .addInput(neos.get("bl-"), 0.0183431952662722, -0.0535612535612536).build();
+                .addInput(motors.get("bl+"), 0.0166667, 0.0888888889)
+                .addInput(motors.get("bl-"), 0.0166667, -0.7777777778).build();
         MotorCombiner brCombiner = new MotorCombiner.Builder(2)
-                .addInput(neos.get("br+"), 0.0183431952662722, 0.0668091168091168)
-                .addInput(neos.get("br-"), 0.0183431952662722, -0.0535612535612536).build();
+                .addInput(motors.get("br+"), 0.0166667, 0.0888888889)
+                .addInput(motors.get("br-"), 0.0166667, -0.7777777778).build();
         MotorCombiner frCombiner = new MotorCombiner.Builder(2)
-                .addInput(neos.get("fr+"), 0.0183431952662722, 0.0668091168091168)
-                .addInput(neos.get("fr-"), 0.0183431952662722, -0.0535612535612536).build();
+                .addInput(motors.get("fr+"), 0.0166667, 0.0888888889)
+                .addInput(motors.get("fr-"), 0.0166667, -0.7777777778).build();
 
         // Create the transmissions
         outputs = new HashMap<>();
@@ -112,35 +110,35 @@ public class Robot extends TimedRobot {
         outputs.put("FR Wheel", new PIDTransmission(frCombiner.getOutput(1), WHEEL_GEAR_RATIO));
 
         // Create the absolute encoders
-        canifier = new CANifier(21);
-        azimuthEncoders = new HashMap<>();
-        azimuthEncoders.put("FL",
-                new SensorTransmission(new CANifiedPWMEncoder(canifier, PWMChannel.PWMChannel0,
-                        outputs.get("FL Azimuth")::getVelocity, new DoublePreferenceConstant("FL Az Enc", 0)),
-                        AZIMUTH_GEAR_RATIO));
-        azimuthEncoders.put("BL",
-                new SensorTransmission(new CANifiedPWMEncoder(canifier, PWMChannel.PWMChannel1,
-                        outputs.get("BL Azimuth")::getVelocity, new DoublePreferenceConstant("BL Az Enc", 0)),
-                        -AZIMUTH_GEAR_RATIO));
-        azimuthEncoders.put("BR",
-                new SensorTransmission(new CANifiedPWMEncoder(canifier, PWMChannel.PWMChannel2,
-                        outputs.get("BR Azimuth")::getVelocity, new DoublePreferenceConstant("BR Az Enc", 0)),
-                        AZIMUTH_GEAR_RATIO));
-        azimuthEncoders.put("FR",
-                new SensorTransmission(new CANifiedPWMEncoder(canifier, PWMChannel.PWMChannel3,
-                        outputs.get("FR Azimuth")::getVelocity, new DoublePreferenceConstant("FR Az Enc", 0)),
-                        -AZIMUTH_GEAR_RATIO));
+        // canifier = new CANifier(21);
+        // azimuthEncoders = new HashMap<>();
+        // azimuthEncoders.put("FL",
+        //         new SensorTransmission(new CANifiedPWMEncoder(canifier, PWMChannel.PWMChannel0,
+        //                 outputs.get("FL Azimuth")::getVelocity, new DoublePreferenceConstant("FL Az Enc", 0)),
+        //                 AZIMUTH_GEAR_RATIO));
+        // azimuthEncoders.put("BL",
+        //         new SensorTransmission(new CANifiedPWMEncoder(canifier, PWMChannel.PWMChannel1,
+        //                 outputs.get("BL Azimuth")::getVelocity, new DoublePreferenceConstant("BL Az Enc", 0)),
+        //                 -AZIMUTH_GEAR_RATIO));
+        // azimuthEncoders.put("BR",
+        //         new SensorTransmission(new CANifiedPWMEncoder(canifier, PWMChannel.PWMChannel2,
+        //                 outputs.get("BR Azimuth")::getVelocity, new DoublePreferenceConstant("BR Az Enc", 0)),
+        //                 AZIMUTH_GEAR_RATIO));
+        // azimuthEncoders.put("FR",
+        //         new SensorTransmission(new CANifiedPWMEncoder(canifier, PWMChannel.PWMChannel3,
+        //                 outputs.get("FR Azimuth")::getVelocity, new DoublePreferenceConstant("FR Az Enc", 0)),
+        //                 -AZIMUTH_GEAR_RATIO));
 
         // Create the modules
         modules = new HashMap<>();
         modules.put("FL", new SwerveModule(outputs.get("FL Wheel"), outputs.get("FL Azimuth"),
-                azimuthEncoders.get("FL"), azimuthPositionPIDConstants));
+                outputs.get("FL Azimuth"), azimuthPositionPIDConstants));
         modules.put("BL", new SwerveModule(outputs.get("BL Wheel"), outputs.get("BL Azimuth"),
-                azimuthEncoders.get("BL"), azimuthPositionPIDConstants));
+                outputs.get("BL Azimuth"), azimuthPositionPIDConstants));
         modules.put("BR", new SwerveModule(outputs.get("BR Wheel"), outputs.get("BR Azimuth"),
-                azimuthEncoders.get("BR"), azimuthPositionPIDConstants));
+                outputs.get("BR Azimuth"), azimuthPositionPIDConstants));
         modules.put("FR", new SwerveModule(outputs.get("FR Wheel"), outputs.get("FR Azimuth"),
-                azimuthEncoders.get("FR"), azimuthPositionPIDConstants));
+                outputs.get("FR Azimuth"), azimuthPositionPIDConstants));
 
         // Set the module locations
         modules.get("FL").setLocation(Vector2D.createCartesianCoordinates(-WIDTH / 2, LENGTH / 2));
@@ -299,8 +297,8 @@ public class Robot extends TimedRobot {
             calibrateMode = true;
 
             // Set all motors to coast mode
-            for (Map.Entry<String, PIDNeo> neo : neos.entrySet()) {
-                neo.getValue().setIdleMode(IdleMode.kCoast);
+            for (Map.Entry<String, PIDFalcon> motor : motors.entrySet()) {
+                motor.getValue().setNeutralMode(NeutralMode.Coast);;
             }
         }
     }
@@ -310,14 +308,14 @@ public class Robot extends TimedRobot {
             calibrateMode = false;
 
             // Set all motors back to brake mode
-            for (Map.Entry<String, PIDNeo> neo : neos.entrySet()) {
-                neo.getValue().setIdleMode(IdleMode.kBrake);
+            for (Map.Entry<String, PIDFalcon> motor : motors.entrySet()) {
+                motor.getValue().setNeutralMode(NeutralMode.Brake);
             }
             // Set azimuths to 0
-            azimuthEncoders.get("FL").calibratePosition(0);
-            azimuthEncoders.get("BL").calibratePosition(0);
-            azimuthEncoders.get("BR").calibratePosition(0);
-            azimuthEncoders.get("FR").calibratePosition(0);
+            outputs.get("FL Azimuth").calibratePosition(0);
+            outputs.get("FR Azimuth").calibratePosition(0);
+            outputs.get("BL Azimuth").calibratePosition(0);
+            outputs.get("BR Azimuth").calibratePosition(0);
 
             // Set gyro to 0
             navx.calibrateYaw(0);

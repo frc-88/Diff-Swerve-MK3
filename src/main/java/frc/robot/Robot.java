@@ -16,24 +16,24 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.team88.swerve.motion.state.FullVelocityMotionState;
-import frc.team88.swerve.motion.state.MotionState;
-import frc.team88.swerve.SwerveChassis;
-import frc.team88.swerve.swervemodule.SwerveModule;
-import frc.team88.swerve.swervemodule.motorsensor.PIDMotor;
-import frc.team88.swerve.swervemodule.motorsensor.PIDNeo;
-import frc.team88.swerve.swervemodule.motorsensor.PIDTransmission;
-import frc.team88.swerve.swervemodule.motorsensor.PositionVelocitySensor;
-import frc.team88.swerve.swervemodule.motorsensor.SensorTransmission;
-import frc.team88.swerve.swervemodule.motorsensor.CANifiedPWMEncoder;
-import frc.team88.swerve.util.Vector2D;
-import frc.team88.swerve.util.WrappedAngle;
-import frc.team88.swerve.util.constants.Constants;
-import frc.team88.swerve.util.constants.DoublePreferenceConstant;
-import frc.team88.swerve.util.constants.PIDPreferenceConstants;
-import frc.team88.swerve.wrappers.gyro.NavX;
-import frc.team88.swerve.swervemodule.motorsensor.MotorCombiner;
-import frc.team88.swerve.swervemodule.motorsensor.PIDFalcon;
+import frc.robot.swerve.motion.state.FullVelocityMotionState;
+import frc.robot.swerve.motion.state.MotionState;
+import frc.robot.swerve.SwerveChassis;
+import frc.robot.swerve.swervemodule.SwerveModule;
+import frc.robot.swerve.swervemodule.motorsensor.PIDMotor;
+import frc.robot.swerve.swervemodule.motorsensor.PIDNeo;
+import frc.robot.swerve.swervemodule.motorsensor.PIDTransmission;
+import frc.robot.swerve.swervemodule.motorsensor.PositionVelocitySensor;
+import frc.robot.swerve.swervemodule.motorsensor.SensorTransmission;
+import frc.robot.swerve.swervemodule.motorsensor.CANifiedPWMEncoder;
+import frc.robot.swerve.util.Vector2D;
+import frc.robot.swerve.util.WrappedAngle;
+import frc.robot.swerve.util.constants.Constants;
+import frc.robot.swerve.util.constants.DoublePreferenceConstant;
+import frc.robot.swerve.util.constants.PIDPreferenceConstants;
+import frc.robot.swerve.wrappers.gyro.NavX;
+import frc.robot.swerve.swervemodule.motorsensor.MotorCombiner;
+import frc.robot.swerve.swervemodule.motorsensor.PIDFalcon;
 
 public class Robot extends TimedRobot {
 
@@ -50,10 +50,10 @@ public class Robot extends TimedRobot {
     private PIDPreferenceConstants azimuthPositionPIDConstants;
 
     private static final double AZIMUTH_GEAR_RATIO = 1. / 360.;
-    private static final double WHEEL_GEAR_RATIO = 1. / ((1. / 3.) * Math.PI);
+    private static final double WHEEL_GEAR_RATIO = 1. / ((1. / 3.5) * Math.PI);
 
-    private static final double WIDTH = 24.75 / 12.;
-    private static final double LENGTH = 21.75 / 12.;
+    private static final double WIDTH = 10.991 * 2/ 12.;
+    private static final double LENGTH = 12.491 / 12.;
 
     private static final double MAX_SPEED = 10;
     private static final double MAX_ROTATION = 360;
@@ -72,12 +72,12 @@ public class Robot extends TimedRobot {
         motors = new HashMap<>();
         motors.put("fl+", new PIDFalcon(16, motorSpeedPIDConstants));
         motors.put("fl-", new PIDFalcon(1, motorSpeedPIDConstants));
-        motors.put("bl+", new PIDFalcon(2, motorSpeedPIDConstants));
-        motors.put("bl-", new PIDFalcon(3, motorSpeedPIDConstants));
+        motors.put("bl+", new PIDFalcon(3, motorSpeedPIDConstants));
+        motors.put("bl-", new PIDFalcon(2, motorSpeedPIDConstants));
         motors.put("br+", new PIDFalcon(12, motorSpeedPIDConstants));
         motors.put("br-", new PIDFalcon(13, motorSpeedPIDConstants));
-        motors.put("fr+", new PIDFalcon(14, motorSpeedPIDConstants));
-        motors.put("fr-", new PIDFalcon(15, motorSpeedPIDConstants));
+        motors.put("fr+", new PIDFalcon(15, motorSpeedPIDConstants));
+        motors.put("fr-", new PIDFalcon(14, motorSpeedPIDConstants));
 
         // Reversing all neos makes for counterclockise azimuth to be positve
         for (Map.Entry<String, PIDFalcon> entry : motors.entrySet()) {

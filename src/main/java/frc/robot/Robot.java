@@ -93,17 +93,17 @@ public class Robot extends TimedRobot {
 
       // Create the differential/planetary
       MotorCombiner flCombiner = new MotorCombiner.Builder(2)
-              .addInput(motors.get("fl+"), -0.0166667, 0.19444444)
-              .addInput(motors.get("fl-"), 0.0166667, 0.22222222).build();
+              .addInput(motors.get("fl+"), -0.041666666, 0.09722222)
+              .addInput(motors.get("fl-"), 0.041666666, 0.069444444).build();
       MotorCombiner blCombiner = new MotorCombiner.Builder(2)
-              .addInput(motors.get("bl+"), -0.0166667, 0.077777778)
-              .addInput(motors.get("bl-"), 0.0166667, 0.088888889).build();
+              .addInput(motors.get("bl+"), -0.041666666, 0.09722222)
+              .addInput(motors.get("bl-"), 0.041666666, 0.069444444).build();
       MotorCombiner brCombiner = new MotorCombiner.Builder(2)
-              .addInput(motors.get("br+"), -0.0166667, 0.077777778)
-              .addInput(motors.get("br-"), 0.0166667, 0.088888889).build();
+              .addInput(motors.get("br+"), -0.041666666, 0.09722222)
+              .addInput(motors.get("br-"), 0.041666666, 0.069444444).build();
       MotorCombiner frCombiner = new MotorCombiner.Builder(2)
-              .addInput(motors.get("fr+"), -0.0166667, 0.077777778)
-              .addInput(motors.get("fr-"), 0.0166667, 0.088888889).build();
+              .addInput(motors.get("fr+"), -0.041666666, 0.09722222)
+              .addInput(motors.get("fr-"), 0.041666666, 0.069444444).build();
 
       // Create the transmissions
       outputs = new HashMap<>();
@@ -187,6 +187,8 @@ public class Robot extends TimedRobot {
       SmartDashboard.putNumber("FR Azimuth", azimuthEncoders.get("FR").getPosition());
 
       SmartDashboard.putNumber("FL Wheel", outputs.get("FL Wheel").getPosition());
+
+      SmartDashboard.putNumber("FL Wheel Speed", outputs.get("FL Wheel").getVelocity());
 
       SmartDashboard.putNumber("FL M1 Speed", motors.get("fl-").getVelocity());
       SmartDashboard.putNumber("FL M2 Speed", motors.get("fl+").getVelocity());
@@ -283,28 +285,29 @@ public class Robot extends TimedRobot {
   public void testInit() {
       SmartDashboard.putNumber("Set Pos Vel", 0);
       SmartDashboard.putNumber("Set Neg Vel", 0);
+      SmartDashboard.putNumber("Set Az", 0);
       disableCalibrateMode();
   }
 
   @Override
   public void testPeriodic() {
-      if (gamepad.getRawButton(1)) {
-          enableCalibrateMode();
-      }
-      if (gamepad.getRawButton(4)) {
-          disableCalibrateMode();
-      }
 
-      
+    //   PIDFalcon pos = motors.get("br+");
+    //   PIDFalcon neg = motors.get("br-");
 
-      PIDFalcon pos = motors.get("br+");
-      PIDFalcon neg = motors.get("br-");
+    //   SmartDashboard.putNumber("Pos Vel", pos.getVelocity());
+    //   SmartDashboard.putNumber("Neg Vel", neg.getVelocity());
 
-      SmartDashboard.putNumber("Pos Vel", pos.getVelocity());
-      SmartDashboard.putNumber("Neg Vel", neg.getVelocity());
+    //   pos.setVelocity(SmartDashboard.getNumber("Set Pos Vel", 0));
+    //   neg.setVelocity(SmartDashboard.getNumber("Set Neg Vel", 0));
 
-      pos.setVelocity(SmartDashboard.getNumber("Set Pos Vel", 0));
-      neg.setVelocity(SmartDashboard.getNumber("Set Neg Vel", 0));
+    SwerveModule mod = modules.get("FL");
+    PositionVelocitySensor az_sens = azimuthEncoders.get("FL");
+
+    SmartDashboard.putNumber("Az", az_sens.getPosition());
+
+    mod.setAzimuthPosition(new WrappedAngle(SmartDashboard.getNumber("Set Az", 0)));
+    mod.setWheelSpeed(0);
 
       // if (gamepad.getRawButton(3)) {
       // pos.calibratePosition(0);

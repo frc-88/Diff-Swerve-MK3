@@ -17,7 +17,6 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.I2C.Port;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.team88.swerve.SwerveChassis;
 import frc.team88.swerve.motion.state.MotionState;
@@ -55,6 +54,8 @@ public class Robot extends TimedRobot {
 
   private PIDPreferenceConstants motorSpeedPIDConstants;
   private PIDPreferenceConstants azimuthPositionPIDConstants;
+  private DoublePreferenceConstant maxAzimuthSpeed;
+  private DoublePreferenceConstant maxAzimuthAcceleration;
 
   private static final double AZIMUTH_GEAR_RATIO = 1. / 360.;
   private static final double WHEEL_GEAR_RATIO = 1. / ((1. / 3.5) * Math.PI);
@@ -74,6 +75,9 @@ public class Robot extends TimedRobot {
       // Initialize the PID constants
       motorSpeedPIDConstants = new PIDPreferenceConstants("Motor Speed", 0, 0.00000035, 0, 0.00019, 150, 0, 0);
       azimuthPositionPIDConstants = new PIDPreferenceConstants("Azimuth Position", 8.5, 0, 0.15, 0, 0, 0, 0);
+      maxAzimuthSpeed = new DoublePreferenceConstant("Azimuth Max Speed", 360);
+      maxAzimuthAcceleration = new DoublePreferenceConstant("Azimuth Max Accel", 720);
+
 
       // Create the base NEOs
       motors = new HashMap<>();
@@ -143,13 +147,13 @@ public class Robot extends TimedRobot {
       // Create the modules
       modules = new HashMap<>();
       modules.put("FL", new SwerveModule(outputs.get("FL Wheel"), outputs.get("FL Azimuth"),
-              azimuthEncoders.get("FL"), azimuthPositionPIDConstants));
+              azimuthEncoders.get("FL"), azimuthPositionPIDConstants, maxAzimuthSpeed, maxAzimuthAcceleration));
       modules.put("BL", new SwerveModule(outputs.get("BL Wheel"), outputs.get("BL Azimuth"),
-              azimuthEncoders.get("BL"), azimuthPositionPIDConstants));
+              azimuthEncoders.get("BL"), azimuthPositionPIDConstants, maxAzimuthSpeed, maxAzimuthAcceleration));
       modules.put("BR", new SwerveModule(outputs.get("BR Wheel"), outputs.get("BR Azimuth"),
-              azimuthEncoders.get("BR"), azimuthPositionPIDConstants));
+              azimuthEncoders.get("BR"), azimuthPositionPIDConstants, maxAzimuthSpeed, maxAzimuthAcceleration));
       modules.put("FR", new SwerveModule(outputs.get("FR Wheel"), outputs.get("FR Azimuth"),
-              azimuthEncoders.get("FR"), azimuthPositionPIDConstants));
+              azimuthEncoders.get("FR"), azimuthPositionPIDConstants, maxAzimuthSpeed, maxAzimuthAcceleration));
 
       // Set the module locations
       modules.get("FL").setLocation(Vector2D.createCartesianCoordinates(-WIDTH / 2, LENGTH / 2));
@@ -190,9 +194,8 @@ public class Robot extends TimedRobot {
 
       SmartDashboard.putNumber("FL Wheel Speed", outputs.get("FL Wheel").getVelocity());
 
-      SmartDashboard.putNumber("FL M1 Speed", motors.get("fl-").getVelocity());
-      SmartDashboard.putNumber("FL M2 Speed", motors.get("fl+").getVelocity());
-      SmartDashboard.putNumber("ratio", motors.get("fl-").getVelocity() / motors.get("fl+").getVelocity());
+      SmartDashboard.putNumber("FL Command Az", modules.get("FL").getCommandedAzimuthPosition().asDouble());
+      SmartDashboard.putNumber("FL Az Velocity", azimuthEncoders.get("FL").getVelocity());
   }
 
   @Override
@@ -248,14 +251,13 @@ public class Robot extends TimedRobot {
       MotionState targetState = chassis.getTargetState();
 
       // Check if the translation angle should be updated
-      System.out.println(Math.sqrt(Math.pow(gamepad.getRawAxis(4), 2) + Math.pow(gamepad.getRawAxis(5), 2)));
-      if (Math.sqrt(Math.pow(gamepad.getRawAxis(4), 2) + Math.pow(gamepad.getRawAxis(5), 2)) > 0.6) {
-          System.out.println(-Math.toDegrees(Math.atan2(gamepad.getRawAxis(4), -gamepad.getRawAxis(5))));
-          this.translationAngle = new WrappedAngle(-Math.toDegrees(Math.atan2(gamepad.getRawAxis(4), -gamepad.getRawAxis(5))));
+      if (Math.sqrt(Math.pow(gamepad.getRawAxis(2), 2) + Math.pow(gamepad.getRawAxis(1), 2)) > 0.6) {
+          this.translationAngle = new WrappedAngle(-Math.toDegrees(Math.atan2(gamepad.getRawAxis(1), gamepad.getRawAxis(2))));
       }
 
       // Determine the translation speed
-      double translationSpeed = gamepad.getRawAxis(3) * (gamepad.getRawAxis(2) * 0.75 + 0.25) * MAX_SPEED;
+    //   double translationSpeed = gamepad.getRawAxis(3) * (gamepad.getRawAxis(2) * 0.75 + 0.25) * MAX_SPEED;
+      double translationSpeed = gamepad.getRawAxis(0) * MAX_SPEED;
 
       // If translation speed is 0, make it slightly larger so the wheels will still
       // turn
@@ -268,8 +270,8 @@ public class Robot extends TimedRobot {
               .changeTranslationVelocity(Vector2D.createPolarCoordinates(translationSpeed, this.translationAngle));
 
       // Set the rotation velocity
-      if (Math.abs(gamepad.getRawAxis(0)) > 0.15) {
-          targetState = targetState.changeRotationVelocity(-Math.signum(gamepad.getRawAxis(0)) * (Math.abs(gamepad.getRawAxis(0)) * 0.9 + 0.1) * MAX_ROTATION);
+      if (Math.abs(gamepad.getRawAxis(3)) > 0.15) {
+          targetState = targetState.changeRotationVelocity(-Math.signum(gamepad.getRawAxis(3)) * (Math.abs(gamepad.getRawAxis(3)) * 0.9 + 0.1) * MAX_ROTATION);
       } else {
           targetState = targetState.changeRotationVelocity(0);
       }

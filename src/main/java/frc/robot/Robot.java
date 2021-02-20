@@ -15,12 +15,14 @@ import com.ctre.phoenix.CANifier.PWMChannel;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.team88.swerve.SwerveChassis;
 import frc.team88.swerve.motion.state.MotionState;
+import frc.team88.swerve.motion.state.OdomState;
 import frc.team88.swerve.swervemodule.SwerveModule;
 import frc.team88.swerve.swervemodule.motorsensor.CANifiedPWMEncoder;
 import frc.team88.swerve.swervemodule.motorsensor.MotorCombiner;
@@ -35,6 +37,7 @@ import frc.team88.swerve.util.constants.Constants;
 import frc.team88.swerve.util.constants.DoublePreferenceConstant;
 import frc.team88.swerve.util.constants.PIDPreferenceConstants;
 import frc.team88.swerve.wrappers.gyro.NavX;
+import frc.team88.swerve.networking.SwerveNetworkTables;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -68,6 +71,8 @@ public class Robot extends TimedRobot {
   private boolean calibrateMode = false;
 
   private WrappedAngle translationAngle = new WrappedAngle(0);
+
+  private SwerveNetworkTables networkTables = new SwerveNetworkTables();
 
   @Override
   public void robotInit() {
@@ -193,6 +198,9 @@ public class Robot extends TimedRobot {
       SmartDashboard.putNumber("FL M1 Speed", motors.get("fl-").getVelocity());
       SmartDashboard.putNumber("FL M2 Speed", motors.get("fl+").getVelocity());
       SmartDashboard.putNumber("ratio", motors.get("fl-").getVelocity() / motors.get("fl+").getVelocity());
+
+      networkTables.setOdom(RobotController.getFPGATime(), chassis.getOdomState());
+      System.out.println(networkTables.getCmdTime());
   }
 
   @Override

@@ -70,6 +70,12 @@ public class Robot extends TimedRobot {
 
   private WrappedAngle translationAngle = new WrappedAngle(0);
 
+  private static final int TRANS_X_AXIS = 4;
+  private static final int TRANS_Y_AXIS = 5;
+  private static final int INVERT_TRANS_Y = -1;
+  private static final int THROTTLE_AXIS = 3;
+  private static final int ROTATION_AXIS = 0;
+
   @Override
   public void robotInit() {
       // Initialize the PID constants
@@ -125,19 +131,19 @@ public class Robot extends TimedRobot {
       azimuthEncoders = new HashMap<>();
       azimuthEncoders.put("FL",
               new SensorTransmission(new CANifiedPWMEncoder(canifier, PWMChannel.PWMChannel0,
-                      outputs.get("FL Azimuth")::getVelocity, new DoublePreferenceConstant("FL Az Enc", 0)),
+                      () -> outputs.get("FL Azimuth").getVelocity() * AZIMUTH_GEAR_RATIO, new DoublePreferenceConstant("FL Az Enc", 0)),
                       AZIMUTH_GEAR_RATIO));
       azimuthEncoders.put("BL",
               new SensorTransmission(new CANifiedPWMEncoder(canifier, PWMChannel.PWMChannel1,
-                      outputs.get("BL Azimuth")::getVelocity, new DoublePreferenceConstant("BL Az Enc", 0)),
+                      () -> outputs.get("BL Azimuth").getVelocity() * AZIMUTH_GEAR_RATIO, new DoublePreferenceConstant("BL Az Enc", 0)),
                       AZIMUTH_GEAR_RATIO));
       azimuthEncoders.put("BR",
               new SensorTransmission(new CANifiedPWMEncoder(canifier, PWMChannel.PWMChannel2,
-                      outputs.get("BR Azimuth")::getVelocity, new DoublePreferenceConstant("BR Az Enc", 0)),
+                      () -> outputs.get("BR Azimuth").getVelocity() * AZIMUTH_GEAR_RATIO, new DoublePreferenceConstant("BR Az Enc", 0)),
                       AZIMUTH_GEAR_RATIO));
       azimuthEncoders.put("FR",
               new SensorTransmission(new CANifiedPWMEncoder(canifier, PWMChannel.PWMChannel3,
-                      outputs.get("FR Azimuth")::getVelocity, new DoublePreferenceConstant("FR Az Enc", 0)),
+                      () -> outputs.get("FR Azimuth").getVelocity() * AZIMUTH_GEAR_RATIO, new DoublePreferenceConstant("FR Az Enc", 0)),
                       AZIMUTH_GEAR_RATIO));
     //   azimuthEncoders.put("FL", outputs.get("FL Azimuth"));
     //   azimuthEncoders.put("FR", outputs.get("FR Azimuth"));
@@ -198,7 +204,6 @@ public class Robot extends TimedRobot {
       SmartDashboard.putNumber("FL Az Velocity", azimuthEncoders.get("FL").getVelocity());
   }
 
-  @Override
   public void disabledInit() {
       disableCalibrateMode();
   }
@@ -251,13 +256,13 @@ public class Robot extends TimedRobot {
       MotionState targetState = chassis.getTargetState();
 
       // Check if the translation angle should be updated
-      if (Math.sqrt(Math.pow(gamepad.getRawAxis(2), 2) + Math.pow(gamepad.getRawAxis(1), 2)) > 0.6) {
-          this.translationAngle = new WrappedAngle(-Math.toDegrees(Math.atan2(gamepad.getRawAxis(1), gamepad.getRawAxis(2))));
+      if (Math.sqrt(Math.pow(gamepad.getRawAxis(TRANS_X_AXIS), 2) + Math.pow(gamepad.getRawAxis(TRANS_Y_AXIS), 2)) > 0.6) {
+          this.translationAngle = new WrappedAngle(-Math.toDegrees(Math.atan2(gamepad.getRawAxis(TRANS_X_AXIS), INVERT_TRANS_Y * gamepad.getRawAxis(TRANS_Y_AXIS))));
       }
 
       // Determine the translation speed
     //   double translationSpeed = gamepad.getRawAxis(3) * (gamepad.getRawAxis(2) * 0.75 + 0.25) * MAX_SPEED;
-      double translationSpeed = gamepad.getRawAxis(0) * MAX_SPEED;
+      double translationSpeed = gamepad.getRawAxis(THROTTLE_AXIS) * MAX_SPEED;
 
       // If translation speed is 0, make it slightly larger so the wheels will still
       // turn
@@ -270,8 +275,8 @@ public class Robot extends TimedRobot {
               .changeTranslationVelocity(Vector2D.createPolarCoordinates(translationSpeed, this.translationAngle));
 
       // Set the rotation velocity
-      if (Math.abs(gamepad.getRawAxis(3)) > 0.15) {
-          targetState = targetState.changeRotationVelocity(-Math.signum(gamepad.getRawAxis(3)) * (Math.abs(gamepad.getRawAxis(3)) * 0.9 + 0.1) * MAX_ROTATION);
+      if (Math.abs(gamepad.getRawAxis(ROTATION_AXIS)) > 0.15) {
+          targetState = targetState.changeRotationVelocity(-Math.signum(gamepad.getRawAxis(ROTATION_AXIS)) * (Math.abs(gamepad.getRawAxis(ROTATION_AXIS)) * 0.9 + 0.1) * MAX_ROTATION);
       } else {
           targetState = targetState.changeRotationVelocity(0);
       }

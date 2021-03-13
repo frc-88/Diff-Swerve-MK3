@@ -70,11 +70,11 @@ public class Robot extends TimedRobot {
 
   private WrappedAngle translationAngle = new WrappedAngle(0);
 
-  private static final int TRANS_X_AXIS = 4;
-  private static final int TRANS_Y_AXIS = 5;
-  private static final int INVERT_TRANS_Y = -1;
-  private static final int THROTTLE_AXIS = 3;
-  private static final int ROTATION_AXIS = 0;
+  private static final int TRANS_X_AXIS = 1;
+  private static final int TRANS_Y_AXIS = 2;
+  private static final int INVERT_TRANS_Y = 1;
+  private static final int THROTTLE_AXIS = 0;
+  private static final int ROTATION_AXIS = 3;
 
   @Override
   public void robotInit() {
@@ -168,7 +168,7 @@ public class Robot extends TimedRobot {
       modules.get("FR").setLocation(Vector2D.createCartesianCoordinates(WIDTH / 2, LENGTH / 2));
 
       // Create and zero gyro
-      navx = new NavX(Port.kOnboard);
+      navx = new NavX(Port.kMXP);
       navx.calibrateYaw(0);
 
       // Create the chassis

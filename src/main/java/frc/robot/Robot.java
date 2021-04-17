@@ -154,13 +154,13 @@ public class Robot extends TimedRobot {
       // Create the modules
       modules = new HashMap<>();
       modules.put("FL", new SwerveModule(outputs.get("FL Wheel"), outputs.get("FL Azimuth"),
-              azimuthEncoders.get("FL"), azimuthPositionPIDConstants, maxAzimuthSpeed, maxAzimuthAcceleration));
+              azimuthEncoders.get("FL"), azimuthPositionPIDConstants, MAX_SPEED, maxAzimuthSpeed, maxAzimuthAcceleration));
       modules.put("BL", new SwerveModule(outputs.get("BL Wheel"), outputs.get("BL Azimuth"),
-              azimuthEncoders.get("BL"), azimuthPositionPIDConstants, maxAzimuthSpeed, maxAzimuthAcceleration));
+              azimuthEncoders.get("BL"), azimuthPositionPIDConstants, MAX_SPEED, maxAzimuthSpeed, maxAzimuthAcceleration));
       modules.put("BR", new SwerveModule(outputs.get("BR Wheel"), outputs.get("BR Azimuth"),
-              azimuthEncoders.get("BR"), azimuthPositionPIDConstants, maxAzimuthSpeed, maxAzimuthAcceleration));
+              azimuthEncoders.get("BR"), azimuthPositionPIDConstants, MAX_SPEED, maxAzimuthSpeed, maxAzimuthAcceleration));
       modules.put("FR", new SwerveModule(outputs.get("FR Wheel"), outputs.get("FR Azimuth"),
-              azimuthEncoders.get("FR"), azimuthPositionPIDConstants, maxAzimuthSpeed, maxAzimuthAcceleration));
+              azimuthEncoders.get("FR"), azimuthPositionPIDConstants, MAX_SPEED, maxAzimuthSpeed, maxAzimuthAcceleration));
 
       // Set the module locations
       modules.get("FL").setLocation(Vector2D.createCartesianCoordinates(-WIDTH / 2, LENGTH / 2));

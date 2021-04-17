@@ -61,7 +61,7 @@ public class Robot extends TimedRobot {
   private static final double WHEEL_GEAR_RATIO = 1. / ((1. / 3.5) * Math.PI);
 
   private static final double WIDTH = 10.991 * 2/ 12.;
-  private static final double LENGTH = 12.491 / 12.;
+  private static final double LENGTH = 12.491 * 2 / 12.;
 
   private static final double MAX_SPEED = 14.7;
   private static final double MAX_ROTATION = 360;
@@ -75,6 +75,7 @@ public class Robot extends TimedRobot {
   private static final int INVERT_TRANS_Y = 1;
   private static final int THROTTLE_AXIS = 0;
   private static final int ROTATION_AXIS = 3;
+  private static final boolean ZERO_IS_AXIS = true;
 
   @Override
   public void robotInit() {
@@ -216,7 +217,7 @@ public class Robot extends TimedRobot {
       if (gamepad.getRawButton(8)) {
           disableCalibrateMode();
       }
-      if (gamepad.getRawButton(4)) {
+      if ((ZERO_IS_AXIS && gamepad.getRawAxis(4) > 0.5) || (!ZERO_IS_AXIS && gamepad.getRawButton(4))) {
           navx.calibrateYaw(0);
       }
   }

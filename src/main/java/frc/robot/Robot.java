@@ -73,7 +73,7 @@ public class Robot extends TimedRobot {
 
   private WrappedAngle translationAngle = new WrappedAngle(0);
 
-  private SwerveNetworkTables networkTables = new SwerveNetworkTables();
+  private SwerveNetworkTables networkTables;
   private static final int TRANS_X_AXIS = 1;
   private static final int TRANS_Y_AXIS = 2;
   private static final int INVERT_TRANS_Y = 1;
@@ -183,6 +183,8 @@ public class Robot extends TimedRobot {
 
       // Create the gamepad
       gamepad = new Joystick(0);
+
+     networkTables = new SwerveNetworkTables(chassis);
   }
 
   @Override
@@ -208,8 +210,8 @@ public class Robot extends TimedRobot {
       SmartDashboard.putNumber("FL Command Az", modules.get("FL").getCommandedAzimuthPosition().asDouble());
       SmartDashboard.putNumber("FL Az Velocity", azimuthEncoders.get("FL").getVelocity());
 
-      networkTables.setOdom(RobotController.getFPGATime(), chassis.getOdomState());
-      System.out.println(networkTables.getCmdTime());
+      networkTables.publishSwerve();
+    //   System.out.println(networkTables.getCmdTime());
   }
 
   public void disabledInit() {

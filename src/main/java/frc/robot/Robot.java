@@ -17,7 +17,12 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.I2C.Port;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Units;
 import frc.team88.swerve.SwerveChassis;
 import frc.team88.swerve.motion.state.MotionState;
 import frc.team88.swerve.swervemodule.SwerveModule;
@@ -76,6 +81,8 @@ public class Robot extends TimedRobot {
   private static final int THROTTLE_AXIS = 0;
   private static final int ROTATION_AXIS = 3;
   private static final boolean ZERO_IS_AXIS = true;
+
+    private SwerveDriveOdometry m_odometry;
 
   @Override
   public void robotInit() {
@@ -177,6 +184,19 @@ public class Robot extends TimedRobot {
               modules.get("FR"));
       chassis.setMaxWheelSpeed(MAX_SPEED);
 
+    // Locations for the swerve drive modules relative to the robot center.
+    Translation2d frontLeftLocation = new Translation2d(LENGTH / 2, WIDTH / 2);
+    Translation2d frontRightLocation = new Translation2d(LENGTH / 2, -WIDTH / 2);
+    Translation2d backLeftLocation = new Translation2d(-LENGTH / 2, WIDTH / 2);
+    Translation2d backRightLocation = new Translation2d(-LENGTH / 2, -WIDTH / 2);
+
+    // Creating my kinematics object using the module locations
+    SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
+        frontLeftLocation, frontRightLocation, backLeftLocation, backRightLocation);
+
+    // Creating my odometry object from the kinematics object, starting at the origin.
+    m_odometry = new SwerveDriveOdometry(m_kinematics, Rotation2d.fromDegrees(-navx.getYaw()), new Pose2d(0.0, 0.0, new Rotation2d()));
+
       // Create the gamepad
       gamepad = new Joystick(0);
   }
@@ -189,6 +209,15 @@ public class Robot extends TimedRobot {
         //   throw new IllegalStateException(
         //           infiniteTJSquareds + " is too much awesome, I don't know how we didn't crash already!");
       }
+
+    // Update the pose
+    Pose2d currentPose = m_odometry.update(Rotation2d.fromDegrees(-navx.getYaw()), 
+        getState(modules.get("FL")), getState(modules.get("FR")),
+        getState(modules.get("BL")), getState(modules.get("BR")));
+
+    SmartDashboard.putNumber("Pose X", currentPose.getX());
+    SmartDashboard.putNumber("Pose Y", currentPose.getY());
+    SmartDashboard.putNumber("Pose Rotation", currentPose.getRotation());
 
       Constants.update();
       SmartDashboard.putNumber("Yaw", navx.getYaw());
@@ -363,5 +392,9 @@ public class Robot extends TimedRobot {
           // Set gyro to 0
           navx.calibrateYaw(0);
       }
+  }
+
+  private SwerveModuleState getState(SwerveModule module) {
+      return new SwerveModuleState(Units.feetToMeters(module.getWheelSpeed()),Rotation2d.fromDegrees(module.getAzimuthPosition()));
   }
 }

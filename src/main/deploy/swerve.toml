@@ -1,0 +1,40 @@
+[gyro]
+template = "navx"
+port-type = "I2C"
+port = "kMXP"
+
+[[modules]]
+template = "team88.diff-swerve-2021.beta"
+location-inches = { x = -10.991, y = 12.491 }
+motors.0.can-id = 1
+motors.1.can-id = 16
+azimuth-sensor.can-id = 1
+azimuth-sensor.pwm-channel = 0
+azimuth-sensor.offset = 0
+
+[[modules]]
+template = "team88.diff-swerve-2021.beta"
+location-inches = { x = -10.991, y = -12.491 }
+motors.0.can-id = 2
+motors.1.can-id = 3
+azimuth-sensor.can-id = 1
+azimuth-sensor.pwm-channel = 1
+azimuth-sensor.offset = 0
+
+[[modules]]
+template = "team88.diff-swerve-2021.beta"
+location-inches = { x = 10.991, y = -12.491 }
+motors.0.can-id = 13
+motors.1.can-id = 12
+azimuth-sensor.can-id = 1
+azimuth-sensor.pwm-channel = 2
+azimuth-sensor.offset = 0
+
+[[modules]]
+template = "team88.diff-swerve-2021.beta"
+location-inches = { x = 10.991, y = 12.491 }
+motors.0.can-id = 14
+motors.1.can-id = 15
+azimuth-sensor.can-id = 1
+azimuth-sensor.pwm-channel = 3
+azimuth-sensor.offset = 0

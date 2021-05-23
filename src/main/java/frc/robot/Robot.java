@@ -56,7 +56,7 @@ public class Robot extends TimedRobot {
             () -> {
               double x = gamepad.getRawAxis(0);
               double y = -gamepad.getRawAxis(1);
-              return Math.toDegrees(Math.atan2(-x, y));
+              return Math.toDegrees(Math.atan2(y, x));
             };
         this.maintainDirection =
             () -> {

@@ -6,39 +6,39 @@ port = "kMXP"
 [[modules]]
 template = "team88.diff-swerve-2021.beta"
 location-inches = { x = 10.991, y = 12.491 }
-motors.0.can-id = 1
-motors.1.can-id = 16
+motors.lo.can-id = 1
+motors.hi.can-id = 16
 azimuth-sensor.template = "canified-pwm"
 azimuth-sensor.can-id = 1
 azimuth-sensor.pwm-channel = 0
-azimuth-sensor.offset = -10.286
+azimuth-sensor.offset = -165.76
 
 [[modules]]
 template = "team88.diff-swerve-2021.beta"
 location-inches = { x = -10.991, y = 12.491 }
-motors.0.can-id = 2
-motors.1.can-id = 3
+motors.lo.can-id = 2
+motors.hi.can-id = 3
 azimuth-sensor.template = "canified-pwm"
 azimuth-sensor.can-id = 1
 azimuth-sensor.pwm-channel = 1
-azimuth-sensor.offset = -150.998
+azimuth-sensor.offset = 137.64
 
 [[modules]]
 template = "team88.diff-swerve-2021.beta"
 location-inches = { x = -10.991, y = -12.491 }
-motors.0.can-id = 13
-motors.1.can-id = 12
+motors.lo.can-id = 13
+motors.hi.can-id = 12
 azimuth-sensor.template = "canified-pwm"
 azimuth-sensor.can-id = 1
 azimuth-sensor.pwm-channel = 2
-azimuth-sensor.offset = 64.687
+azimuth-sensor.offset = -161.46
 
 [[modules]]
 template = "team88.diff-swerve-2021.beta"
 location-inches = { x = 10.991, y = -12.491 }
-motors.0.can-id = 14
-motors.1.can-id = 15
+motors.lo.can-id = 14
+motors.hi.can-id = 15
 azimuth-sensor.template = "canified-pwm"
 azimuth-sensor.can-id = 1
 azimuth-sensor.pwm-channel = 3
-azimuth-sensor.offset = 168.133
+azimuth-sensor.offset = -11.52
